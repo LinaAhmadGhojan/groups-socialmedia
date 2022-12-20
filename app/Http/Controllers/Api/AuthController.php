@@ -45,6 +45,7 @@ public function ____construct()
         $input["password"]=bcrypt($input["password"]);
         $user=User::create($input);
         $success["token"]=$user->createToken('MyApp')->plainTextToken;
+        $success["id"]=$user->id ;
         $success["name"]=$user->first_name ;
 
          $response=[
@@ -64,11 +65,14 @@ public function ____construct()
     {
       $user=Auth::user();
       $success["token"]=$user->createToken('MyApp')->plainTextToken;
+      $success["id"]=$user->id ;
       $success["name"]=$user->first_name ;
+      
       $response=[
         'success'=>true,
         'date'=>$success,
-        'message'=>"user login successfully"
+        'message'=>"user login successfully",
+        
      ];
      return response()->json($response,200);
 
