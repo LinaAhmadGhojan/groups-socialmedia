@@ -42,26 +42,10 @@ class FileController extends Controller
     $input=$request->all();
 
 
-    if ($file = $request->file('file')) {
-        $path = $file->store('public/files');
+         $file = $request->file('file');
+          $path = $file->store('public');
         $name = $file->getClientOriginalName();
-
-
-          
-        return response()->json([
-            "success" => true,
-            "message" => "File successfully uploaded",
-            "file" => $file
-        ]);
-
-    }
-
-   /*      $file = $request->file("file");
-        $name = time().'.'.$file->getClientOriginalExtension();
-        Storage::disk('local')->put('public/'.$name, 'Contents');
-
-
-
+        $name= basename($path);
         _FILE::create([
          "id_owner"=>$user->id,
          'state'=>"check-out",
@@ -76,7 +60,7 @@ class FileController extends Controller
         'success'=>true,
         'message'=>"user add file to public successfully"
          ];
-     return response()->json($response,200); */
+     return response()->json($response,200); 
 
 
    }
@@ -106,9 +90,13 @@ class FileController extends Controller
     $user = $token->tokenable;
     $input=$request->all();
 
-        $file = $request->file("file");
+    $file = $request->file('file');
+    $path = $file->store('public/'.$request->id_group);
+    $name = $file->getClientOriginalName();
+    $name= basename($path);
+       /*  $file = $request->file("file");
         $name = time().'.'.$file->getClientOriginalExtension();
-        Storage::disk('local')->put('public/'.$request->id_group.'/'.$name, 'Contents');
+        Storage::disk('local')->put('public/'.$request->id_group.'/'.$name, 'Contents'); */
 
         $file=_FILE::create([
             "id_owner"=>$user->id,
@@ -116,7 +104,7 @@ class FileController extends Controller
             'public'=>"0",
             'name_file'=>$request->name_file,
             'name'=>$name,
-            'url'=>request()->getHttpHost().'/storage/'.$name
+            'url'=>request()->getHttpHost().'/storage/'.$request->id_group.'/'.$name
    
         ]);
 
