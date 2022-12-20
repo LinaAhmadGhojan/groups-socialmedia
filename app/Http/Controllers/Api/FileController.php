@@ -54,7 +54,7 @@ class FileController extends Controller
          'public'=>"1",
          'name_file'=>$request->name_file,
          'name'=>$name,
-         'url'=>request()->getHttpHost().'/storage/'.$name
+         'url'=>'/storage/'.$name
 
      ]);
 
@@ -107,7 +107,7 @@ class FileController extends Controller
             'public'=>"0",
             'name_file'=>$request->name_file,
             'name'=>$name,
-            'url'=>request()->getHttpHost().'/storage/'.$request->id_group.'/'.$name
+            'url'=>'/storage/'.$request->id_group.'/'.$name
    
         ]);
 
