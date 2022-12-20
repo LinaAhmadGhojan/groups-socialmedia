@@ -19,12 +19,12 @@ class FileController extends Controller
    public function create(Request $request)
    {
 
-
+ // return request()->ip();
     $validator=Validator::make($request->all(),
       //role
     [
         
-        'file'=>'required|mimes:doc,docx,txt,png,pdf,json',
+        'file'=>'required|mimes:doc,docx,pdf,txt,csv,json|max:2048',
         'name_file'=>"required"
 
     ] );
@@ -41,7 +41,22 @@ class FileController extends Controller
     $user = $token->tokenable;
     $input=$request->all();
 
-        $file = $request->file("file");
+
+    if ($file = $request->file('file')) {
+        $path = $file->store('public/files');
+        $name = $file->getClientOriginalName();
+
+
+          
+        return response()->json([
+            "success" => true,
+            "message" => "File successfully uploaded",
+            "file" => $file
+        ]);
+
+    }
+
+   /*      $file = $request->file("file");
         $name = time().'.'.$file->getClientOriginalExtension();
         Storage::disk('local')->put('public/'.$name, 'Contents');
 
@@ -53,7 +68,7 @@ class FileController extends Controller
          'public'=>"1",
          'name_file'=>$request->name_file,
          'name'=>$name,
-         'url'=>request()->getHttpHost().'/storage/'.$name
+         'url'=>request()->getHttpHost().':8000/storage/'.$name
 
      ]);
 
@@ -61,7 +76,7 @@ class FileController extends Controller
         'success'=>true,
         'message'=>"user add file to public successfully"
          ];
-     return response()->json($response,200);
+     return response()->json($response,200); */
 
 
    }

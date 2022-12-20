@@ -29,7 +29,7 @@ class Group extends Model
     {
     return  \DB::table('groups')->leftjoin('group_users','group_users.id_group','=','groups.id')
     ->where('group_users.id_user','=',$id)->join('users','groups.id_admin','=','users.id')
-    ->select('group_users.*','number_user','user_name as user_admin','id_group','email as email_admin','id_admin')
+    ->select('group_users.*','number_user','user_name as user_admin','id_group','email as email_admin','id_admin','groups.name as name_group')
     ->get();
 
     }
