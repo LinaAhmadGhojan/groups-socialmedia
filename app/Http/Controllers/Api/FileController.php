@@ -7,6 +7,8 @@ use Tokenly\RecordLock\Facade\RecordLock;
 use App\Http\Controllers\Controller;
 use App\Models\_FILE;
 use App\Models\FileGroup;
+use App\Models\GroupUser;
+use App\Models\Group;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
@@ -46,19 +48,20 @@ class FileController extends Controller
           $path = $file->store('public');
         $name = $file->getClientOriginalName();
         $name= basename($path);
-        _FILE::create([
+        $f= _FILE::create([
          "id_owner"=>$user->id,
          'state'=>"check-out",
          'public'=>"1",
          'name_file'=>$request->name_file,
          'name'=>$name,
-         'url'=>request()->getHttpHost().':8000/storage/'.$name
+         'url'=>request()->getHttpHost().'/storage/'.$name
 
      ]);
 
      $response=[
         'success'=>true,
-        'message'=>"user add file to public successfully"
+        'message'=>"user add file to public successfully",
+        "url"=>$f->url
          ];
      return response()->json($response,200); 
 
@@ -113,7 +116,9 @@ class FileController extends Controller
 
      $response=[
         'success'=>true,
-        'message'=>"user add file to group successfully"
+        'message'=>"user add file to group successfully",
+        "url"=>$file->url
+
          ];
      return response()->json($response,200);
 
@@ -281,13 +286,15 @@ class FileController extends Controller
    public function check_in(Request $request)
    {
 
+    $token = PersonalAccessToken::findToken($request->bearerToken());
+    $user = $token->tokenable;
     $file=_File::find($request->id_file);
     if($file)
         if(_File::find($request->id_file)->state=="check-in")
         {
             $response=[
                 'success'=>false,
-                'date'=>"the file check-in before from another user"
+                'date'=>"the file check-in before from  user"
                  ];
              return response()->json($response,200);
         }
@@ -299,6 +306,20 @@ class FileController extends Controller
             'success'=>true,
             'date'=>$file
              ];
+   
+
+  if($file->public=="0")
+  {
+     $group_file=FileGroup::where('id_file',$file->id)->get()->first();  
+     $group_user=GroupUser::where('id_user',$user->id)->where('id_group',$group_file->id_group)->get()->first();
+     $group_user->counter_file+=1;
+     $group_user->save();
+
+     $group=Group::find($group_file->id_group);
+     $group->number_file_check_in+=1;
+     $group->save();
+
+  }
          return response()->json($response,200);
    }
 
@@ -306,7 +327,8 @@ class FileController extends Controller
    public function check_out(Request $request)
    {
 
-
+    $token = PersonalAccessToken::findToken($request->bearerToken());
+    $user = $token->tokenable;
     $file=_File::find($request->id_file);
          $file->state="check-out";
          $file->save();
@@ -315,6 +337,19 @@ class FileController extends Controller
             'success'=>true,
             'message'=>"The file has been check-out successfully"
              ];
+             if($file->public=="0")
+             {
+                $group_file=FileGroup::where('id_file',$file->id)->get()->first();  
+                $group_user=GroupUser::where('id_user',$user->id)->where('id_group',$group_file->id_group)->get()->first();
+                $group_user->counter_file-=1;
+                $group_user->save();
+           
+                $group=Group::find($group_file->id_group);
+                $group->number_file_check_in-=1;
+                $group->save();
+           
+             }
+
          return response()->json($response,200);
    }
 
