@@ -54,7 +54,8 @@ class FileController extends Controller
          'public'=>"1",
          'name_file'=>$request->name_file,
          'name'=>$name,
-         'url'=>'/storage/'.$name
+         'url'=>'/storage/'.$name,
+
 
      ]);
 
@@ -107,8 +108,9 @@ class FileController extends Controller
             'public'=>"0",
             'name_file'=>$request->name_file,
             'name'=>$name,
-            'url'=>'/storage/'.$request->id_group.'/'.$name
-   
+            'url'=>'/storage/'.$request->id_group.'/'.$name,
+
+            
         ]);
 
 
@@ -283,6 +285,48 @@ class FileController extends Controller
    }
 
 
+
+   public function updateFilePublic(Request $request)
+   {
+    $file=_File::find($request->id_file);
+    $file->name=$request->file_name;
+    
+    $f = $request->file('file');
+    $path = $f->store('public');
+    $name = $f->getClientOriginalName();
+    $name= basename($path);
+    $file->name=$name;
+    $file->url='/storage/'.$name;
+
+    $response=[
+       'success'=>true,
+       'date'=>$file->url
+        ];
+    return response()->json($response,200);
+   }
+
+
+   public function updateFileGroup(Request $request)
+   {
+     
+     $file=_File::find($request->id_file);
+     $file->name=$request->file_name;
+     
+     $f = $request->file('file');
+     $path = $f->store('public/'.$request->id_group);
+     $name = $f->getClientOriginalName();
+     $name= basename($path);
+     $file->name=$name;
+     $file->url='/storage/'.$name;
+
+     $response=[
+        'success'=>true,
+        'date'=>$file->url
+         ];
+     return response()->json($response,200);
+   }
+
+
    public function check_in(Request $request)
    {
 
@@ -300,6 +344,8 @@ class FileController extends Controller
         }
          $file = _File::lockForUpdate()->find($request->id_file); // 'balance' =>
          $file->state="check-in";
+         $file->user_name_check_in=$user->user_name;
+
          $file->save();
 
          $response=[
@@ -310,8 +356,8 @@ class FileController extends Controller
 
   if($file->public=="0")
   {
-     $group_file=FileGroup::where('id_file',$file->id)->get()->first();  
-     $group_user=GroupUser::where('id_user',$user->id)->where('id_group',$group_file->id_group)->get()->first();
+      $group_file=FileGroup::where('id_file',$file->id)->get()->first();  
+      $group_user=GroupUser::where('id_user',$user->id)->where('id_group',$group_file->id_group)->get()->first();
      $group_user->counter_file+=1;
      $group_user->save();
 
@@ -401,6 +447,28 @@ public function bulk_check_in(Request $request)
 }
 }
 
+
+public function adminFile(Request $request)
+{
+    $token = PersonalAccessToken::findToken($request->bearerToken());
+    $user = $token->tokenable;
+    if($user->role=="admin")  
+          { 
+            $file=_File::all();
+            $response=[
+                'success'=>true,
+                'date'=>$file
+                 ];
+             return response()->json($response,200);
+            }
+
+            $response=[
+                'success'=>false,
+                'date'=>"user is not admin"
+                 ];
+             return response()->json($response,400);
+         
+}
 
 
 }

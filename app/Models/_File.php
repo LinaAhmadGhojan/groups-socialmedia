@@ -16,7 +16,8 @@ class _File extends Model
         'url',
         'upload_date',
         'update_date',
-        'name_file'
+        'name_file',
+        'user_name_check_in'
     ];
 
     public function recordLock()

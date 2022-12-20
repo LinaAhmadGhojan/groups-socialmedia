@@ -56,9 +56,11 @@ Route::controller(FileController::class)->prefix('/file')->group(function()
     Route::post('/check-in','check_in');
     Route::post('/bulk-check-in','bulk_check_in');
     Route::post('/check-out','check_out');
-    Route::put('/update/{id_user}','updateFile');
+    Route::post('/update/public','updateFilePublic');
+    Route::post('/update/group','updateFileGroup');
     Route::delete('/delete/{id_user}','deleteFile');
     Route::post('/read','readFile');
+    Route::post('/admin','adminFile');
 
 });
 
